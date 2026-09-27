@@ -1,0 +1,1 @@
+<template><main class="page"><p class="eyebrow">LEDDITS / TECH PLAYGROUND</p><h1>기술스택 실습실</h1><p class="lead">브라우저에서 기술의 동작 흐름을 체험하는 공간입니다.</p><div class="panel">실습 모듈을 준비하고 있습니다.</div></main></template>
