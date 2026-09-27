@@ -1,6 +1,27 @@
-# 레디츠 학습 메모 — Vue + Firebase
+# 레디츠 학습 공간 — 연습장과 기술스택 실습실
 
-사용자의 create-vue 포크 README를 확인하고, 안내된 공식 create-vue 생성기로 만든 별도 앱입니다. 포크 저장소는 수정하지 않았으며 새 GitHub 저장소 생성/업로드는 수행하지 않았습니다.
+Vue + Firebase 학습 메모에 홈과 기술스택 실습실을 추가한 프로젝트입니다.
+
+## 화면 구성
+
+- `#/`: 연습장 / 실습 두 가지 진입 버튼
+- `#/practice`: 기존 Google 로그인과 Firebase 학습 메모 CRUD
+- `#/lab`: 로그인 없이 사용하는 기술스택 실습실
+
+해시 경로이므로 새로고침과 브라우저 뒤로 가기를 지원합니다. Firebase 코드는 연습장 진입 시 지연 로딩합니다.
+
+| 모듈 | 체험 내용 | 실행 범위 |
+| --- | --- | --- |
+| Vue · Firebase | 입력/수량 변경에 따른 반응형 계산, 연습장 이동 | Vue 실제 실행, Firebase는 기존 연습장 |
+| 토스페이먼츠 | 주문 생성, 인증, 금액 불일치, 승인 | 로컬 시뮬레이션, SDK/API 미호출 |
+| 모두싸인 | 문서 요청, 열람, 확인 후 서명 | 로컬 시뮬레이션, 알림 미발송 |
+| AI 비전 | 화재/연기 예제 박스 임계값, 영상 처리 예산 | 합성 예제, YOLO/TensorRT/DeepStream 미실행 |
+| ROS 2 · Nvblox | 복셀 크기, 가상 스캔, 셀 수 비교 | 2D 단면 모형, 실제 TSDF/지도 생성 아님 |
+
+실습 상태는 메모리에만 보관하며 모듈 이동/새로고침 시 초기화됩니다. Jetson이 없어도 모든 모형을 조작할 수 있습니다. 실제 장비 연결 계획과 요구사항은 [docs/JETSON.md](docs/JETSON.md)를 참고하세요.
+
+실제 결제와 전자서명은 별도의 백엔드와 서비스 설정이 필요합니다. 시크릿 키/API 인증 정보는 Vue 코드나 `VITE_` 환경변수에 넣지 않습니다.
+
 
 ## 준비
 Node.js 22.18 이상(22.x) 또는 24.12 이상이 필요합니다.
@@ -19,7 +40,7 @@ Authentication → 설정 → 승인된 도메인에서 `localhost`가 없으면
 전달받은 OAuth 클라이언트 ID는 앱에 직접 삽입하지 않습니다. Firebase의 Google 제공업체 설정을 SDK가 사용합니다.
 
 ## 실행
-압축을 풀고 해당 폴더의 터미널에서 실행하세요.
+저장소를 내려받은 폴더의 터미널에서 실행하세요.
 ```sh
 npm ci
 npm run dev
@@ -43,7 +64,13 @@ Google 로그인/로그아웃 및 로그인 복원이 지원됩니다. 같은 Go
 이전 익명 계정이 남아 있다면 Google 계정 연결로 UID와 메모를 유지합니다. 이미 다른 Firebase 사용자에게 연결된 Google 계정인 경우 자동 병합하지 않고 별도 버튼으로 기존 계정 로그인을 제공합니다. 이 경우 익명 메모는 자동 이동되지 않습니다.
 
 ## 파일
-- src/App.vue: 화면과 Firestore CRUD
+- src/App.vue: 홈/연습장/실습 해시 경로와 공통 메뉴
+- src/views/HomeView.vue: 초기 선택 화면
+- src/views/PracticeView.vue: 기존 화면과 Firestore CRUD
+- src/views/LabView.vue: 기술스택 모듈 선택
+- src/components/: 웹 서비스 · 비전 · 복셀 실습 화면
+- src/lab/models.ts: 탐지 예제 및 학습용 계산식
+- tests/lab-models.test.mjs: 계산식 경계값 검증
 - src/firebase.ts: Firebase 초기화
 - firestore.rules: 사용자별 권한 및 데이터 검증
 - firebase.json: Firestore 규칙 경로 및 Hosting 설정
@@ -56,5 +83,14 @@ npx firebase-tools deploy --only hosting --project vuepractice-c5f09
 ```
 배포와 원격 규칙 변경은 자동 실행하지 않았습니다.
 
+## 검증
+
+```sh
+npm test
+npm run build
+```
+
+브라우저 확인: 홈에서 두 페이지 이동, 실습 모듈 전환, 결제 금액 불일치/정상 승인, 서명 동의 확인, 탐지 임계값, 복셀 크기 변경, 모바일 화면, 새로고침을 확인합니다.
+
 ## 검증 범위
-TypeScript 검사와 프로덕션 빌드를 통과했습니다. 실제 Firebase 콘솔 설정 여부와 원격 CRUD는 아직 검증하지 않았습니다. 설정 후 메모 등록 → 새로고침 → 수정 → 완료 표시 → 삭제 순으로 확인하세요.
+계산식 테스트 3개, happy-dom 기반 Vue 화면 동작 테스트 8개, TypeScript 검사와 프로덕션 빌드를 통과했습니다. 브라우저 실행 파일 다운로드가 실패하여 실제 브라우저의 시각적 레이아웃/모바일 렌더링 검사는 완료하지 못했습니다. 실제 Firebase 콘솔 설정 여부와 원격 CRUD는 아직 검증하지 않았습니다. 설정 후 메모 등록 → 새로고침 → 수정 → 완료 표시 → 삭제 순으로 확인하세요.
